@@ -1,6 +1,6 @@
 package com.gabrielferreira.br.controller;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,24 +9,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gabrielferreira.br.exception.RegraException;
 import com.gabrielferreira.br.modelo.Calculadora;
 import com.gabrielferreira.br.service.impl.CalculadoraServiceImpl;
 
 @SpringBootTest
+@ActiveProfiles("test") // Rodar com o perfil de teste, rodar com o ambiente de teste
 @AutoConfigureMockMvc
 public class CalculadoraControllerTest {
 	
-	private static String API_CURSO = "/calculadora";
+	private static String API_CALCULADORA = "/calculadora";
 	private static MediaType JSON = MediaType.APPLICATION_JSON;
 	
 	@Autowired
@@ -40,21 +45,26 @@ public class CalculadoraControllerTest {
 	@BeforeEach
 	private void criarInstancias() {
 		// Cenário
-		calculadora = Calculadora.builder().id(null).primeiroValor(any()).segundoValor(any()).build();
+		calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(15)).build();
 	}
 	
 	@Test
+	@DisplayName("Deve calcular a soma de valores.")
 	public void deveCalcularSoma() throws Exception {
 		
+		// Cenário 
+		Calculadora calculadoraResultadoTotal = Calculadora.builder().id(1L).primeiroValor(calculadora.getPrimeiroValor())
+				.segundoValor(calculadora.getSegundoValor())
+				.valorTotal(BigDecimal.valueOf(25)).build();
+		
 		// Execução 
-		BigDecimal resultadoTotal = BigDecimal.valueOf(20);
-		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(resultadoTotal);
+		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadoraResultadoTotal);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
 		
 		// Criar uma requisição do tipo post
-		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CURSO + "/somar")
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/somar")
 												.accept(JSON)
 												.contentType(JSON)
 												.content(json);
@@ -62,24 +72,50 @@ public class CalculadoraControllerTest {
 			.perform(request)
 			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("id").value(calculadora.getId()))
-			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
-			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(resultadoTotal));
+			.andExpect(jsonPath("id").value(calculadoraResultadoTotal.getId()))
+			.andExpect(jsonPath("primeiroValor").value(calculadoraResultadoTotal.getPrimeiroValor()))
+			.andExpect(jsonPath("segundoValor").value(calculadoraResultadoTotal.getSegundoValor()))
+			.andExpect(jsonPath("valorTotal").value(calculadoraResultadoTotal.getValorTotal()))
+			.andExpect(jsonPath("tipoCalculo").value(calculadoraResultadoTotal.getTipoCalculo()));
 			
 	}
 	
 	@Test
+	@DisplayName("Não deve calcular soma, pois um dos valores é negativo.")
+	public void naoDeveCalcularSoma() throws Exception {
+		
+		// Cenário e executando o método de somar com o mock
+		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(-10)).segundoValor(BigDecimal.valueOf(-20)).build();
+		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor()))
+			.thenThrow(new RegraException("Não deve somar com valores negativos."));
+		
+		// Transformar o objeto em json
+		String json = new ObjectMapper().writeValueAsString(calculadora);
+		
+		// Criar uma requisição do tipo post
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/somar").accept(JSON).contentType(JSON).content(json);
+				
+		// Fazendo o teste e verificando
+		mockMvc.perform(request).andDo(print())
+						.andExpect(status().isBadRequest())
+						.andExpect(jsonPath("mensagem", equalTo("Não deve somar com valores negativos.")));
+	}
+	
+	@Test
 	public void deveCalcularSubtracao() throws Exception {
+		
 		// Execução 
-		BigDecimal resultadoTotal = BigDecimal.valueOf(40);
-		when(calculadoraServiceImpl.subtrair(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(resultadoTotal);
+		Calculadora calculadoraResultadoTotal = Calculadora.builder().id(1L).primeiroValor(calculadora.getPrimeiroValor())
+				.segundoValor(calculadora.getSegundoValor())
+				.valorTotal(BigDecimal.valueOf(-5)).build();
+		
+		when(calculadoraServiceImpl.subtrair(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadoraResultadoTotal);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
 		
 		// Criar uma requisição do tipo post
-		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CURSO + "/subtrair")
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/subtrair")
 												.accept(JSON)
 												.contentType(JSON)
 												.content(json);
@@ -87,24 +123,28 @@ public class CalculadoraControllerTest {
 			.perform(request)
 			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("id").value(calculadora.getId()))
-			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
-			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(resultadoTotal));
+			.andExpect(jsonPath("id").value(calculadoraResultadoTotal.getId()))
+			.andExpect(jsonPath("primeiroValor").value(calculadoraResultadoTotal.getPrimeiroValor()))
+			.andExpect(jsonPath("segundoValor").value(calculadoraResultadoTotal.getSegundoValor()))
+			.andExpect(jsonPath("valorTotal").value(calculadoraResultadoTotal.getValorTotal()));
 			
 	}
 	
 	@Test
 	public void deveCalcularDivisao() throws Exception {
+		
 		// Execução 
-		BigDecimal resultadoTotal = BigDecimal.valueOf(70);
-		when(calculadoraServiceImpl.divisao(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(resultadoTotal);
+		Calculadora calculadoraResultadoTotal = Calculadora.builder().id(1L).primeiroValor(BigDecimal.valueOf(10))
+				.segundoValor(BigDecimal.valueOf(2))
+				.valorTotal(BigDecimal.valueOf(5)).build();
+		
+		when(calculadoraServiceImpl.divisao(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadoraResultadoTotal);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
 		
 		// Criar uma requisição do tipo post
-		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CURSO + "/divisao")
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/divisao")
 												.accept(JSON)
 												.contentType(JSON)
 												.content(json);
@@ -112,24 +152,51 @@ public class CalculadoraControllerTest {
 			.perform(request)
 			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("id").value(calculadora.getId()))
-			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
-			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(resultadoTotal));
+			.andExpect(jsonPath("id").value(calculadoraResultadoTotal.getId()))
+			.andExpect(jsonPath("primeiroValor").value(calculadoraResultadoTotal.getPrimeiroValor()))
+			.andExpect(jsonPath("segundoValor").value(calculadoraResultadoTotal.getSegundoValor()))
+			.andExpect(jsonPath("valorTotal").value(calculadoraResultadoTotal.getValorTotal()));
 			
 	}
 	
 	@Test
+	@DisplayName("Não deve calculae divisão, pois o segundo número é 0.")
+	public void naoDeveCalcularDivisao() throws Exception {
+		
+		// Cenário e executando o método de somar com o mock
+		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(10))
+				.segundoValor(BigDecimal.valueOf(0)).build();
+		
+		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor()))
+				.thenThrow(new RegraException("Não é possível dividir com o valor 0."));
+
+		// Transformar o objeto em json
+		String json = new ObjectMapper().writeValueAsString(calculadora);
+
+		// Criar uma requisição do tipo post
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/somar").accept(JSON)
+				.contentType(JSON).content(json);
+
+		// Fazendo o teste e verificando
+		mockMvc.perform(request).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("mensagem", equalTo("Não é possível dividir com o valor 0.")));
+	}
+	
+	@Test
+	@DisplayName("Deve calcular a multiplicação.")
 	public void deveCalcularMultiplicacao() throws Exception {
-		// Execução 
-		BigDecimal resultadoTotal = BigDecimal.valueOf(100);
-		when(calculadoraServiceImpl.multiplicar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(resultadoTotal);
+		
+		// Cenário e executando o método de somar com o mock
+		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(10))
+						.segundoValor(BigDecimal.valueOf(0)).valorTotal(BigDecimal.valueOf(0)).build();
+		
+		when(calculadoraServiceImpl.multiplicar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadora);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
 		
 		// Criar uma requisição do tipo post
-		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CURSO + "/multiplicacao")
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/multiplicacao")
 												.accept(JSON)
 												.contentType(JSON)
 												.content(json);
@@ -140,7 +207,7 @@ public class CalculadoraControllerTest {
 			.andExpect(jsonPath("id").value(calculadora.getId()))
 			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
 			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(resultadoTotal));
+			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()));
 			
 	}
 
