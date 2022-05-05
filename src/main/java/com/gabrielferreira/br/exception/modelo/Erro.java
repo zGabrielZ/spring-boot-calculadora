@@ -1,6 +1,7 @@
 package com.gabrielferreira.br.exception.modelo;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class Erro implements Serializable{
 	private String mensagem;
 	private Integer status;
 	private String data;
+	private List<String> listaErrosCampos;
 
 }

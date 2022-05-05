@@ -244,5 +244,26 @@ public class CalculadoraControllerTest {
     		.andExpect(status().isOk())
     		.andExpect(jsonPath("$[*]",Matchers.hasSize(3)));
 	}
+	
+	@Test
+	@DisplayName("Não deve calcular soma pois não tem dados suficientes.")
+	public void naoDeveCalcularSomaValoresVazios() throws Exception{
+		// Cenário
+		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(null)
+				.segundoValor(null).valorTotal(null).build();
+		
+		// Transformar o objto em json
+		ObjectMapper objectMapper = new ObjectMapper();
+		String json = objectMapper.writeValueAsString(calculadora);
+						
+		// Criar uma requisição do tipo post
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(API_CALCULADORA + "/somar").accept(JSON).contentType(JSON).content(json);
+				
+		// Verificar a requisição
+		mockMvc.perform(request)
+					.andDo(print())
+					.andExpect(status().isBadRequest())
+					.andExpect(jsonPath("listaErrosCampos",Matchers.hasSize(2)));
+	}
 
 }

@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,9 +40,11 @@ public class Calculadora implements Serializable{
 	@EqualsAndHashCode.Include
 	private Long id;
 	
+	@NotNull(message = "O primeiro valor não pode ser vazio.")
 	@Column(name = "primeiro_valor")
 	private BigDecimal primeiroValor;
 	
+	@NotNull(message = "O segundo valor não pode ser vazio.")
 	@Column(name = "segundo_valor")
 	private BigDecimal segundoValor;
 	

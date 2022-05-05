@@ -2,6 +2,8 @@ package com.gabrielferreira.br.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,25 +24,25 @@ public class CalculadoraController {
 	private CalculadoraServiceImpl calculadoraServiceImpl;
 	
 	@PostMapping("/somar")
-	public ResponseEntity<Calculadora> calcularSoma(@RequestBody Calculadora calculadora){
+	public ResponseEntity<Calculadora> calcularSoma(@Valid @RequestBody Calculadora calculadora){
 		Calculadora resultado = calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
 		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/subtrair")
-	public ResponseEntity<Calculadora> calcularSubtracao(@RequestBody Calculadora calculadora){
+	public ResponseEntity<Calculadora> calcularSubtracao(@Valid @RequestBody Calculadora calculadora){
 		Calculadora resultado = calculadoraServiceImpl.subtrair(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
 		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/divisao")
-	public ResponseEntity<Calculadora> calcularDivisao(@RequestBody Calculadora calculadora){
+	public ResponseEntity<Calculadora> calcularDivisao(@Valid @RequestBody Calculadora calculadora){
 		Calculadora resultado = calculadoraServiceImpl.divisao(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
 		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/multiplicacao")
-	public ResponseEntity<Calculadora> calcularMultiplicacao(@RequestBody Calculadora calculadora){
+	public ResponseEntity<Calculadora> calcularMultiplicacao(@Valid @RequestBody Calculadora calculadora){
 		Calculadora resultado = calculadoraServiceImpl.multiplicar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
 		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
 	}
