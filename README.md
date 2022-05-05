@@ -1,7 +1,10 @@
 # Calculadora
-Foi utilizado com a linguagem Java com a versão 8 e o framework Spring Boot, arquitetura REST e também foi feito os testes unitários.
 
-Para utilizar a aplicação é necessário utilizar o Postman.
+# Tecnologias
+- Java (Versão 11)
+- Spring Boot REST
+- JUnit 
+- Banco de dados H2 (Memória)
 
 # Endpoints da calculadora
 
@@ -19,8 +22,6 @@ Esse endpoint é responsável realizar a divisão.
 
 #### Parametros 
 
-id : Código da classe Calculadora
-
 primeiroValor : Primeiro valor da classe Calculadora 
 
 segundoValor : Segundo valor da classe Calculadora
@@ -29,7 +30,6 @@ segundoValor : Segundo valor da classe Calculadora
 
 ```
 {
-    "id":null,
     "primeiroValor":10,
     "segundoValor":20
 }
@@ -37,7 +37,35 @@ segundoValor : Segundo valor da classe Calculadora
 
 ##### Respostas
 Created ! 201.
+
 Bad Request ! 400.
+
+### GET/calculadora/
+Esse endpoint é responsável retornar lista de cálculos realizados.
+
+#### Exemplo 
+
+```
+[
+    {
+        "id": 1,
+        "primeiroValor": 10.00,
+        "segundoValor": 40.00,
+        "valorTotal": 50.00,
+        "tipoCalculo": "Soma"
+    },
+    {
+        "id": 2,
+        "primeiroValor": 40.00,
+        "segundoValor": 42.00,
+        "valorTotal": -2.00,
+        "tipoCalculo": "Subtração"
+    }
+]
+```
+
+##### Respostas
+OK ! 200.
 
 ##### Regras de negócios
 Caso um dos valores for negativo quando for executar o endpoint 'calculadora/somar', é lançado uma exceção informando que não se deve somar com valores negativos.
