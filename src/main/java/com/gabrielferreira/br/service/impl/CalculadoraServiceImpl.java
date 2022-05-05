@@ -1,6 +1,7 @@
 package com.gabrielferreira.br.service.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -72,6 +73,12 @@ public class CalculadoraServiceImpl implements CalculadoraService{
 		calculadora.setSegundoValor(segundoValor);
 		calculadora.setValorTotal(resultado);
 		return calculadora;
+	}
+
+	@Override
+	public List<Calculadora> listagensCalculos() {
+		List<Calculadora> calculadoras = calculadoraRepositorio.findAll();
+		return calculadoras;
 	}
 
 }

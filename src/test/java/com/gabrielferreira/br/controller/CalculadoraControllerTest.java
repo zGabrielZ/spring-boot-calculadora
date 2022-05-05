@@ -7,7 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -209,6 +212,37 @@ public class CalculadoraControllerTest {
 			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
 			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()));
 			
+	}
+	
+	@Test
+	@DisplayName("Deve mostrar lista de calculos realizados.")
+	public void deveMostrarListagensCalculos() throws Exception{
+		// Cenário 
+    	List<Calculadora> calculadoras = new ArrayList<>();
+    	calculadoras.add(Calculadora.builder().id(1L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    			.valorTotal(BigDecimal.valueOf(30)).tipoCalculo("Multiplicação")
+    			.build());
+    	calculadoras.add(Calculadora.builder().id(2L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    			.valorTotal(BigDecimal.valueOf(13)).tipoCalculo("Soma")
+    			.build());
+    	calculadoras.add(Calculadora.builder().id(3L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    			.valorTotal(BigDecimal.valueOf(7)).tipoCalculo("Subtração")
+    			.build());
+    	
+    	// Mock para retornar os dados de cima 
+    	when(calculadoraServiceImpl.listagensCalculos()).thenReturn(calculadoras);
+    	
+    	// Criar um requisição do tipo get
+    	MockHttpServletRequestBuilder request = MockMvcRequestBuilders.get(API_CALCULADORA)
+    												.accept(JSON)
+    												.contentType(JSON);
+    	
+    	// Verificando 
+    	mockMvc
+    		.perform(request)
+    		.andDo(print())
+    		.andExpect(status().isOk())
+    		.andExpect(jsonPath("$[*]",Matchers.hasSize(3)));
 	}
 
 }

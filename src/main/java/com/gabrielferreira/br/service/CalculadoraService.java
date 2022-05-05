@@ -1,6 +1,7 @@
 package com.gabrielferreira.br.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.gabrielferreira.br.modelo.Calculadora;
 
@@ -13,4 +14,6 @@ public interface CalculadoraService {
 	public Calculadora divisao(BigDecimal primeiroValor, BigDecimal segundoValor);
 	
 	public Calculadora multiplicar(BigDecimal primeiroValor, BigDecimal segundoValor);
+	
+	public List<Calculadora> listagensCalculos();
 }

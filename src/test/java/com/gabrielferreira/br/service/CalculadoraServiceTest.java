@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -330,6 +332,32 @@ public class CalculadoraServiceTest {
         Assertions.assertThat(calculadora.getValorTotal()).isBetween(BigDecimal.valueOf(-50), BigDecimal.valueOf(-20));
         Assertions.assertThat(calculadora.getValorTotal()).isGreaterThan(BigDecimal.valueOf(-550));
         Assertions.assertThat(calculadora.getValorTotal()).isNegative();
+    }
+    
+    @Test
+    @DisplayName("Deve retornar lista de calculos realizados com sucesso.")
+    public void deveRetornarListasDeCalculos() {
+    	// Cenário
+    	List<Calculadora> calculadoras = new ArrayList<>();
+    	calculadoras.add(Calculadora.builder().id(1L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    			.valorTotal(BigDecimal.valueOf(30)).tipoCalculo("Multiplicação")
+    			.build());
+    	calculadoras.add(Calculadora.builder().id(2L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    			.valorTotal(BigDecimal.valueOf(13)).tipoCalculo("Soma")
+    			.build());
+    	calculadoras.add(Calculadora.builder().id(3L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    			.valorTotal(BigDecimal.valueOf(7)).tipoCalculo("Subtração")
+    			.build());
+    	
+    	// Mock para retornar a lista 
+    	when(calculadoraRepositorio.findAll()).thenReturn(calculadoras);
+    	
+    	// Executando 
+    	List<Calculadora> calculadorasRetorno = calculadoraServiceImpl.listagensCalculos();
+    	
+    	// Verificando
+    	Assertions.assertThat(calculadorasRetorno.size()).isEqualTo(3);
+    	Assertions.assertThat(!calculadorasRetorno.isEmpty()).isTrue();
     }
 
 }
