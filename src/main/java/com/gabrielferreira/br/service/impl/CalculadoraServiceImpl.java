@@ -2,11 +2,13 @@ package com.gabrielferreira.br.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.gabrielferreira.br.exception.RegraException;
 import com.gabrielferreira.br.modelo.Calculadora;
+import com.gabrielferreira.br.modelo.dto.CalculadoraDTO;
 import com.gabrielferreira.br.repositorio.CalculadoraRepositorio;
 import com.gabrielferreira.br.service.CalculadoraService;
 
@@ -24,61 +26,85 @@ public class CalculadoraServiceImpl implements CalculadoraService{
 	private final CalculadoraRepositorio calculadoraRepositorio;
 	
 	@Override
-	public Calculadora somar(BigDecimal primeiroValor, BigDecimal segundoValor) {
+	public CalculadoraDTO somar(CalculadoraDTO calculadoraDTO) {
 		
-		if(primeiroValor.compareTo(BigDecimal.ZERO) == -1 || segundoValor.compareTo(BigDecimal.ZERO) == -1) {
+		if(calculadoraDTO.getPrimeiroValor().compareTo(BigDecimal.ZERO) == -1 || calculadoraDTO.getSegundoValor().compareTo(BigDecimal.ZERO) == -1) {
 			throw new RegraException("Não deve somar com valores negativos.");
 		}
 		
-		BigDecimal resultado = primeiroValor.add(segundoValor);
+		// Populando o DTO
+		BigDecimal resultado = calculadoraDTO.getPrimeiroValor().add(calculadoraDTO.getSegundoValor());
+		calculadoraDTO.setValorTotal(resultado);
+		calculadoraDTO.setTipoCalculo("Soma");
 		
-		Calculadora calculadora = getCalculadora(primeiroValor, segundoValor, resultado);
-		calculadora.setTipoCalculo("Soma");
+		// Populando a entidade e salvando
+		Calculadora calculadora = getCalculadora(calculadoraDTO);
+		calculadora = calculadoraRepositorio.save(calculadora);
 		
-		return calculadoraRepositorio.save(calculadora);
+		return new CalculadoraDTO(calculadora);
 	}
 
 	@Override
-	public Calculadora subtrair(BigDecimal primeiroValor, BigDecimal segundoValor) {
-		BigDecimal resultado = primeiroValor.subtract(segundoValor);
-		Calculadora calculadora = getCalculadora(primeiroValor, segundoValor, resultado);
-		calculadora.setTipoCalculo("Subtração");
-		return calculadoraRepositorio.save(calculadora);
+	public CalculadoraDTO subtrair(CalculadoraDTO calculadoraDTO) {
+		// Populando o DTO
+		BigDecimal resultado = calculadoraDTO.getPrimeiroValor().subtract(calculadoraDTO.getSegundoValor());
+		calculadoraDTO.setValorTotal(resultado);
+		calculadoraDTO.setTipoCalculo("Subtração");
+		
+		// Populando a entidade e salvando
+		Calculadora calculadora = getCalculadora(calculadoraDTO);
+		calculadora = calculadoraRepositorio.save(calculadora);
+		
+		return new CalculadoraDTO(calculadora);
 	}
 
 	@Override
-	public Calculadora divisao(BigDecimal primeiroValor, BigDecimal segundoValor) {
+	public CalculadoraDTO divisao(CalculadoraDTO calculadoraDTO) {
 		
-		if(segundoValor.compareTo(BigDecimal.ZERO) == 0) {
+		if(calculadoraDTO.getSegundoValor().compareTo(BigDecimal.ZERO) == 0) {
 			throw new RegraException("Não é possível dividir com o valor 0.");
 		}
 		
-		BigDecimal resultado = primeiroValor.divide(segundoValor);
-		Calculadora calculadora = getCalculadora(primeiroValor, segundoValor, resultado);
-		calculadora.setTipoCalculo("Divisão");
-		return calculadoraRepositorio.save(calculadora);
+		// Populando DTO
+		BigDecimal resultado = calculadoraDTO.getPrimeiroValor().divide(calculadoraDTO.getSegundoValor());
+		calculadoraDTO.setValorTotal(resultado);
+		calculadoraDTO.setTipoCalculo("Divisão");
+		
+		// Populando a entidade e salvando
+		Calculadora calculadora = getCalculadora(calculadoraDTO);
+		calculadora = calculadoraRepositorio.save(calculadora);
+		
+		return new CalculadoraDTO(calculadora);
 	}
 
 	@Override
-	public Calculadora multiplicar(BigDecimal primeiroValor, BigDecimal segundoValor) {
-		BigDecimal resultado = primeiroValor.multiply(segundoValor);
-		Calculadora calculadora = getCalculadora(primeiroValor, segundoValor, resultado);
-		calculadora.setTipoCalculo("Multiplicação");
-		return calculadoraRepositorio.save(calculadora);
+	public CalculadoraDTO multiplicar(CalculadoraDTO calculadoraDTO) {
+		// Populando DTO
+		BigDecimal resultado = calculadoraDTO.getPrimeiroValor().multiply(calculadoraDTO.getSegundoValor());
+		calculadoraDTO.setValorTotal(resultado);
+		calculadoraDTO.setTipoCalculo("Multiplicação");
+		
+		// Populando a entidade e salvando
+		Calculadora calculadora = getCalculadora(calculadoraDTO);
+		calculadora = calculadoraRepositorio.save(calculadora);
+		
+		return new CalculadoraDTO(calculadora);
 	}
 	
-	private Calculadora getCalculadora(BigDecimal primeiroValor, BigDecimal segundoValor, BigDecimal resultado) {
+	private Calculadora getCalculadora(CalculadoraDTO calculadoraDTO) {
 		Calculadora calculadora = new Calculadora();
-		calculadora.setPrimeiroValor(primeiroValor);
-		calculadora.setSegundoValor(segundoValor);
-		calculadora.setValorTotal(resultado);
+		calculadora.setPrimeiroValor(calculadoraDTO.getPrimeiroValor());
+		calculadora.setSegundoValor(calculadoraDTO.getSegundoValor());
+		calculadora.setValorTotal(calculadoraDTO.getValorTotal());
+		calculadora.setTipoCalculo(calculadoraDTO.getTipoCalculo());
 		return calculadora;
 	}
 
 	@Override
-	public List<Calculadora> listagensCalculos() {
+	public List<CalculadoraDTO> listagensCalculos() {
 		List<Calculadora> calculadoras = calculadoraRepositorio.findAll();
-		return calculadoras;
+		List<CalculadoraDTO> calculadoraDTOs = calculadoras.stream().map(c -> new CalculadoraDTO(c)).collect(Collectors.toList());
+		return calculadoraDTOs;
 	}
 
 }

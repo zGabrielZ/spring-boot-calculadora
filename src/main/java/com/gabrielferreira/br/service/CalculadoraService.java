@@ -1,19 +1,16 @@
 package com.gabrielferreira.br.service;
-
-import java.math.BigDecimal;
 import java.util.List;
-
-import com.gabrielferreira.br.modelo.Calculadora;
+import com.gabrielferreira.br.modelo.dto.CalculadoraDTO;
 
 public interface CalculadoraService {
 
-	public Calculadora somar(BigDecimal primeiroValor, BigDecimal segundoValor);
+	public CalculadoraDTO somar(CalculadoraDTO calculadoraDTO);
 	
-	public Calculadora subtrair(BigDecimal primeiroValor, BigDecimal segundoValor);
+	public CalculadoraDTO subtrair(CalculadoraDTO calculadoraDTO);
 	
-	public Calculadora divisao(BigDecimal primeiroValor, BigDecimal segundoValor);
+	public CalculadoraDTO divisao(CalculadoraDTO calculadoraDTO);
 	
-	public Calculadora multiplicar(BigDecimal primeiroValor, BigDecimal segundoValor);
+	public CalculadoraDTO multiplicar(CalculadoraDTO calculadoraDTO);
 	
-	public List<Calculadora> listagensCalculos();
+	public List<CalculadoraDTO> listagensCalculos();
 }

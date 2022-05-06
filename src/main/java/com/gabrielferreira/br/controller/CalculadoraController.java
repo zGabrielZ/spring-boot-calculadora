@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.gabrielferreira.br.modelo.Calculadora;
+import com.gabrielferreira.br.modelo.dto.CalculadoraDTO;
 import com.gabrielferreira.br.service.impl.CalculadoraServiceImpl;
 
 @RestController
@@ -24,32 +23,32 @@ public class CalculadoraController {
 	private CalculadoraServiceImpl calculadoraServiceImpl;
 	
 	@PostMapping("/somar")
-	public ResponseEntity<Calculadora> calcularSoma(@Valid @RequestBody Calculadora calculadora){
-		Calculadora resultado = calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
-		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
+	public ResponseEntity<CalculadoraDTO> calcularSoma(@Valid @RequestBody CalculadoraDTO calculadoraDTO){
+		calculadoraDTO = calculadoraServiceImpl.somar(calculadoraDTO);
+		return new ResponseEntity<>(calculadoraDTO,HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/subtrair")
-	public ResponseEntity<Calculadora> calcularSubtracao(@Valid @RequestBody Calculadora calculadora){
-		Calculadora resultado = calculadoraServiceImpl.subtrair(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
-		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
+	public ResponseEntity<CalculadoraDTO> calcularSubtracao(@Valid @RequestBody CalculadoraDTO calculadoraDTO){
+		calculadoraDTO = calculadoraServiceImpl.subtrair(calculadoraDTO);
+		return new ResponseEntity<>(calculadoraDTO,HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/divisao")
-	public ResponseEntity<Calculadora> calcularDivisao(@Valid @RequestBody Calculadora calculadora){
-		Calculadora resultado = calculadoraServiceImpl.divisao(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
-		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
+	public ResponseEntity<CalculadoraDTO> calcularDivisao(@Valid @RequestBody CalculadoraDTO calculadoraDTO){
+		calculadoraDTO = calculadoraServiceImpl.divisao(calculadoraDTO);
+		return new ResponseEntity<>(calculadoraDTO,HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/multiplicacao")
-	public ResponseEntity<Calculadora> calcularMultiplicacao(@Valid @RequestBody Calculadora calculadora){
-		Calculadora resultado = calculadoraServiceImpl.multiplicar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor());
-		return new ResponseEntity<>(resultado,HttpStatus.CREATED);
+	public ResponseEntity<CalculadoraDTO> calcularMultiplicacao(@Valid @RequestBody CalculadoraDTO calculadoraDTO){
+		calculadoraDTO = calculadoraServiceImpl.multiplicar(calculadoraDTO);
+		return new ResponseEntity<>(calculadoraDTO,HttpStatus.CREATED);
 	}
 	
 	@GetMapping
-	public ResponseEntity<List<Calculadora>> listagensCalculos(){
-		List<Calculadora> calculadoras = calculadoraServiceImpl.listagensCalculos();
+	public ResponseEntity<List<CalculadoraDTO>> listagensCalculos(){
+		List<CalculadoraDTO> calculadoras = calculadoraServiceImpl.listagensCalculos();
 		return new ResponseEntity<>(calculadoras,HttpStatus.OK);
 	}
 	
