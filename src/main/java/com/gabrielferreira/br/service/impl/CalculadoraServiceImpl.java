@@ -39,7 +39,7 @@ public class CalculadoraServiceImpl implements CalculadoraService{
 		
 		// Populando a entidade e salvando
 		Calculadora calculadora = getCalculadora(calculadoraDTO);
-		calculadora = calculadoraRepositorio.save(calculadora);
+		calculadoraRepositorio.save(calculadora);
 		
 		return new CalculadoraDTO(calculadora);
 	}
@@ -53,7 +53,7 @@ public class CalculadoraServiceImpl implements CalculadoraService{
 		
 		// Populando a entidade e salvando
 		Calculadora calculadora = getCalculadora(calculadoraDTO);
-		calculadora = calculadoraRepositorio.save(calculadora);
+		calculadoraRepositorio.save(calculadora);
 		
 		return new CalculadoraDTO(calculadora);
 	}
@@ -72,7 +72,7 @@ public class CalculadoraServiceImpl implements CalculadoraService{
 		
 		// Populando a entidade e salvando
 		Calculadora calculadora = getCalculadora(calculadoraDTO);
-		calculadora = calculadoraRepositorio.save(calculadora);
+		calculadoraRepositorio.save(calculadora);
 		
 		return new CalculadoraDTO(calculadora);
 	}
@@ -86,7 +86,7 @@ public class CalculadoraServiceImpl implements CalculadoraService{
 		
 		// Populando a entidade e salvando
 		Calculadora calculadora = getCalculadora(calculadoraDTO);
-		calculadora = calculadoraRepositorio.save(calculadora);
+		calculadoraRepositorio.save(calculadora);
 		
 		return new CalculadoraDTO(calculadora);
 	}
