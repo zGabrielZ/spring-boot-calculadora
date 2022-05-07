@@ -1,6 +1,7 @@
 package com.gabrielferreira.br.controller;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gabrielferreira.br.exception.RegraException;
-import com.gabrielferreira.br.modelo.Calculadora;
+import com.gabrielferreira.br.modelo.dto.CalculadoraDTO;
 import com.gabrielferreira.br.service.impl.CalculadoraServiceImpl;
 
 @SpringBootTest
@@ -43,25 +43,18 @@ public class CalculadoraControllerTest {
 	@MockBean // Quando o contexto subir, não pode injetar o objeto real, so com os objetos falsos
 	private CalculadoraServiceImpl calculadoraServiceImpl;
 	
-	private Calculadora calculadora;
-	
-	@BeforeEach
-	private void criarInstancias() {
-		// Cenário
-		calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(15)).build();
-	}
-	
 	@Test
 	@DisplayName("Deve calcular a soma de valores.")
 	public void deveCalcularSoma() throws Exception {
 		
 		// Cenário 
-		Calculadora calculadoraResultadoTotal = Calculadora.builder().id(1L).primeiroValor(calculadora.getPrimeiroValor())
-				.segundoValor(calculadora.getSegundoValor())
-				.valorTotal(BigDecimal.valueOf(25)).build();
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(10))
+				.segundoValor(BigDecimal.valueOf(20))
+				.valorTotal(BigDecimal.valueOf(30))
+				.tipoCalculo("Soma").build();
 		
-		// Execução 
-		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadoraResultadoTotal);
+		// Mock da execução 
+		when(calculadoraServiceImpl.somar(any())).thenReturn(calculadora);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
@@ -75,11 +68,11 @@ public class CalculadoraControllerTest {
 			.perform(request)
 			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("id").value(calculadoraResultadoTotal.getId()))
-			.andExpect(jsonPath("primeiroValor").value(calculadoraResultadoTotal.getPrimeiroValor()))
-			.andExpect(jsonPath("segundoValor").value(calculadoraResultadoTotal.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(calculadoraResultadoTotal.getValorTotal()))
-			.andExpect(jsonPath("tipoCalculo").value(calculadoraResultadoTotal.getTipoCalculo()));
+			.andExpect(jsonPath("id").value(calculadora.getId()))
+			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
+			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
+			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()))
+			.andExpect(jsonPath("tipoCalculo").value(calculadora.getTipoCalculo()));
 			
 	}
 	
@@ -87,9 +80,14 @@ public class CalculadoraControllerTest {
 	@DisplayName("Não deve calcular soma, pois um dos valores é negativo.")
 	public void naoDeveCalcularSoma() throws Exception {
 		
-		// Cenário e executando o método de somar com o mock
-		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(-10)).segundoValor(BigDecimal.valueOf(-20)).build();
-		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor()))
+		// Cenário
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(-10))
+				.segundoValor(BigDecimal.valueOf(20))
+				.valorTotal(BigDecimal.valueOf(10))
+				.tipoCalculo("Soma").build();
+		
+		// Mock da execução 
+		when(calculadoraServiceImpl.somar(any()))
 			.thenThrow(new RegraException("Não deve somar com valores negativos."));
 		
 		// Transformar o objeto em json
@@ -105,14 +103,17 @@ public class CalculadoraControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Deve calcular subtração")
 	public void deveCalcularSubtracao() throws Exception {
 		
-		// Execução 
-		Calculadora calculadoraResultadoTotal = Calculadora.builder().id(1L).primeiroValor(calculadora.getPrimeiroValor())
-				.segundoValor(calculadora.getSegundoValor())
-				.valorTotal(BigDecimal.valueOf(-5)).build();
+		// Cenário 
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(20))
+				.segundoValor(BigDecimal.valueOf(20))
+				.valorTotal(BigDecimal.valueOf(0))
+				.tipoCalculo("Subtração").build();
 		
-		when(calculadoraServiceImpl.subtrair(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadoraResultadoTotal);
+		// Mock com valores de cima
+		when(calculadoraServiceImpl.subtrair(any())).thenReturn(calculadora);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
@@ -126,22 +127,26 @@ public class CalculadoraControllerTest {
 			.perform(request)
 			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("id").value(calculadoraResultadoTotal.getId()))
-			.andExpect(jsonPath("primeiroValor").value(calculadoraResultadoTotal.getPrimeiroValor()))
-			.andExpect(jsonPath("segundoValor").value(calculadoraResultadoTotal.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(calculadoraResultadoTotal.getValorTotal()));
+			.andExpect(jsonPath("id").value(calculadora.getId()))
+			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
+			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
+			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()))
+			.andExpect(jsonPath("tipoCalculo").value(calculadora.getTipoCalculo()));
 			
 	}
 	
 	@Test
+	@DisplayName("Deve calcular divisão")
 	public void deveCalcularDivisao() throws Exception {
 		
-		// Execução 
-		Calculadora calculadoraResultadoTotal = Calculadora.builder().id(1L).primeiroValor(BigDecimal.valueOf(10))
-				.segundoValor(BigDecimal.valueOf(2))
-				.valorTotal(BigDecimal.valueOf(5)).build();
+		// Cenário 
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(20))
+				.segundoValor(BigDecimal.valueOf(20))
+				.valorTotal(BigDecimal.valueOf(1))
+				.tipoCalculo("Divisão").build();
 		
-		when(calculadoraServiceImpl.divisao(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadoraResultadoTotal);
+		// Mock com valores de cima
+		when(calculadoraServiceImpl.divisao(any())).thenReturn(calculadora);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
@@ -155,22 +160,26 @@ public class CalculadoraControllerTest {
 			.perform(request)
 			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("id").value(calculadoraResultadoTotal.getId()))
-			.andExpect(jsonPath("primeiroValor").value(calculadoraResultadoTotal.getPrimeiroValor()))
-			.andExpect(jsonPath("segundoValor").value(calculadoraResultadoTotal.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(calculadoraResultadoTotal.getValorTotal()));
+			.andExpect(jsonPath("id").value(calculadora.getId()))
+			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
+			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
+			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()))
+			.andExpect(jsonPath("tipoCalculo").value(calculadora.getTipoCalculo()));
 			
 	}
 	
 	@Test
-	@DisplayName("Não deve calculae divisão, pois o segundo número é 0.")
+	@DisplayName("Não deve fazer a divisão, pois o segundo número é 0.")
 	public void naoDeveCalcularDivisao() throws Exception {
 		
-		// Cenário e executando o método de somar com o mock
-		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(10))
-				.segundoValor(BigDecimal.valueOf(0)).build();
+		// Cenário
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(20))
+				.segundoValor(BigDecimal.valueOf(0))
+				.valorTotal(BigDecimal.valueOf(0))
+				.tipoCalculo("Divisão").build();
 		
-		when(calculadoraServiceImpl.somar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor()))
+		// Mock com valores de cima
+		when(calculadoraServiceImpl.somar(any()))
 				.thenThrow(new RegraException("Não é possível dividir com o valor 0."));
 
 		// Transformar o objeto em json
@@ -189,11 +198,14 @@ public class CalculadoraControllerTest {
 	@DisplayName("Deve calcular a multiplicação.")
 	public void deveCalcularMultiplicacao() throws Exception {
 		
-		// Cenário e executando o método de somar com o mock
-		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(BigDecimal.valueOf(10))
-						.segundoValor(BigDecimal.valueOf(0)).valorTotal(BigDecimal.valueOf(0)).build();
+		// Cenário
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(2))
+				.segundoValor(BigDecimal.valueOf(2))
+				.valorTotal(BigDecimal.valueOf(4))
+				.tipoCalculo("Multiplicação").build();
 		
-		when(calculadoraServiceImpl.multiplicar(calculadora.getPrimeiroValor(), calculadora.getSegundoValor())).thenReturn(calculadora);
+		// Mock com valores de cima
+		when(calculadoraServiceImpl.multiplicar(any())).thenReturn(calculadora);
 		
 		// Transforar objeto em uma string json
 		String json = new ObjectMapper().writeValueAsString(calculadora);
@@ -210,7 +222,8 @@ public class CalculadoraControllerTest {
 			.andExpect(jsonPath("id").value(calculadora.getId()))
 			.andExpect(jsonPath("primeiroValor").value(calculadora.getPrimeiroValor()))
 			.andExpect(jsonPath("segundoValor").value(calculadora.getSegundoValor()))
-			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()));
+			.andExpect(jsonPath("valorTotal").value(calculadora.getValorTotal()))
+			.andExpect(jsonPath("tipoCalculo").value(calculadora.getTipoCalculo()));
 			
 	}
 	
@@ -218,14 +231,14 @@ public class CalculadoraControllerTest {
 	@DisplayName("Deve mostrar lista de calculos realizados.")
 	public void deveMostrarListagensCalculos() throws Exception{
 		// Cenário 
-    	List<Calculadora> calculadoras = new ArrayList<>();
-    	calculadoras.add(Calculadora.builder().id(1L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    	List<CalculadoraDTO> calculadoras = new ArrayList<>();
+    	calculadoras.add(CalculadoraDTO.builder().id(1L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
     			.valorTotal(BigDecimal.valueOf(30)).tipoCalculo("Multiplicação")
     			.build());
-    	calculadoras.add(Calculadora.builder().id(2L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    	calculadoras.add(CalculadoraDTO.builder().id(2L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
     			.valorTotal(BigDecimal.valueOf(13)).tipoCalculo("Soma")
     			.build());
-    	calculadoras.add(Calculadora.builder().id(3L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
+    	calculadoras.add(CalculadoraDTO.builder().id(3L).primeiroValor(BigDecimal.valueOf(10)).segundoValor(BigDecimal.valueOf(3))
     			.valorTotal(BigDecimal.valueOf(7)).tipoCalculo("Subtração")
     			.build());
     	
@@ -249,8 +262,10 @@ public class CalculadoraControllerTest {
 	@DisplayName("Não deve calcular soma pois não tem dados suficientes.")
 	public void naoDeveCalcularSomaValoresVazios() throws Exception{
 		// Cenário
-		Calculadora calculadora = Calculadora.builder().id(null).primeiroValor(null)
-				.segundoValor(null).valorTotal(null).build();
+		CalculadoraDTO calculadora = CalculadoraDTO.builder().id(1L).primeiroValor(null)
+				.segundoValor(null)
+				.valorTotal(null)
+				.tipoCalculo(null).build();
 		
 		// Transformar o objto em json
 		ObjectMapper objectMapper = new ObjectMapper();
