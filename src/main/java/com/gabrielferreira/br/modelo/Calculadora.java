@@ -39,10 +39,10 @@ public class Calculadora implements Serializable{
 	@EqualsAndHashCode.Include
 	private Long id;
 	
-	@Column(name = "primeiro_valor")
+	@Column(name = "primeiro_valor", nullable = false)
 	private BigDecimal primeiroValor;
 	
-	@Column(name = "segundo_valor")
+	@Column(name = "segundo_valor", nullable = false)
 	private BigDecimal segundoValor;
 	
 	@Column(name = "valor_total")
