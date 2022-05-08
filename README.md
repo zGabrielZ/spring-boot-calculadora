@@ -5,6 +5,7 @@
 - Spring Boot REST
 - JUnit 
 - Banco de dados H2 (Memória)
+- Banco de dados PostgreSQL
 
 # Endpoints da calculadora
 
